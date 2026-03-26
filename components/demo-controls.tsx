@@ -95,7 +95,7 @@ export function DemoControls() {
         <div className="mb-3 w-56 rounded-lg border border-border bg-card p-3 shadow-lg">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Demo Controls
+              Controls
             </span>
             <button
               onClick={() => setOpen(false)}
