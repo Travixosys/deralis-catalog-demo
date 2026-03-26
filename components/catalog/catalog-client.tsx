@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { products } from "@/lib/mock-data";
@@ -11,15 +12,25 @@ import { ProductCard } from "./product-card";
 import { ProductGridSkeleton } from "./product-grid-skeleton";
 
 export function CatalogClient() {
+  const searchParams = useSearchParams();
+  const stockFilter = searchParams.get("stock");
+
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category | "All">(
     "All"
+  );
+  const [showLowStockOnly, setShowLowStockOnly] = useState(
+    stockFilter === "low"
   );
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setShowLowStockOnly(stockFilter === "low");
+  }, [stockFilter]);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -28,9 +39,10 @@ export function CatalogClient() {
       const matchesSearch = p.name
         .toLowerCase()
         .includes(search.toLowerCase());
-      return matchesCategory && matchesSearch;
+      const matchesStock = !showLowStockOnly || p.stockStatus === "Low Stock";
+      return matchesCategory && matchesSearch && matchesStock;
     });
-  }, [search, activeCategory]);
+  }, [search, activeCategory, showLowStockOnly]);
 
   return (
     <div className="space-y-6">
@@ -50,10 +62,13 @@ export function CatalogClient() {
         {(["All", ...CATEGORIES] as const).map((cat) => (
           <button
             key={cat}
-            onClick={() => setActiveCategory(cat)}
+            onClick={() => {
+              setActiveCategory(cat);
+              setShowLowStockOnly(false);
+            }}
             className={cn(
               "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
-              activeCategory === cat
+              activeCategory === cat && !showLowStockOnly
                 ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-secondary-foreground hover:bg-accent"
             )}
@@ -61,6 +76,17 @@ export function CatalogClient() {
             {cat}
           </button>
         ))}
+        <button
+          onClick={() => setShowLowStockOnly(!showLowStockOnly)}
+          className={cn(
+            "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+            showLowStockOnly
+              ? "bg-amber-500 text-white"
+              : "bg-secondary text-secondary-foreground hover:bg-accent"
+          )}
+        >
+          ⚠ Low Stock
+        </button>
       </div>
 
       {/* Product grid */}
