@@ -31,10 +31,10 @@ export function ProductCard({ product }: { product: Product }) {
   const isOutOfStock = product.stockStatus === "Out of Stock";
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex flex-col overflow-hidden rounded-[6px] border border-[#e8d5b7] bg-white shadow-sm transition-all hover:shadow-md hover:border-[#92400e]">
       {/* Placeholder image */}
       <div
-        className="flex h-40 items-center justify-center"
+        className="flex h-40 items-center justify-center rounded-[4px] mx-[1px] mt-[1px]"
         style={{ backgroundColor: product.placeholderColor }}
       >
         <span className="text-2xl font-bold text-white/90">
@@ -65,7 +65,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         <Button
-          className="mt-auto w-full"
+          className="mt-auto w-full rounded-[4px] bg-[#92400e] text-white hover:bg-[#78350f] disabled:bg-[#d6d3d1] disabled:text-[#a8a29e]"
           size="sm"
           disabled={isOutOfStock}
           onClick={() => addItem(product)}

@@ -69,8 +69,8 @@ export function CatalogClient() {
             className={cn(
               "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
               activeCategory === cat && !showLowStockOnly
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-accent"
+                ? "bg-[#92400e] text-white border-transparent"
+                : "bg-[#fff8f0] text-[#78350f] border border-[#e8d5b7] hover:bg-[#fdf0e0]"
             )}
           >
             {cat}
@@ -81,8 +81,8 @@ export function CatalogClient() {
           className={cn(
             "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
             showLowStockOnly
-              ? "bg-amber-500 text-white"
-              : "bg-secondary text-secondary-foreground hover:bg-accent"
+              ? "bg-amber-500 text-white border-transparent"
+              : "bg-[#fff8f0] text-[#78350f] border border-[#e8d5b7] hover:bg-[#fdf0e0]"
           )}
         >
           ⚠ Low Stock

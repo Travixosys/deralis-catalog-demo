@@ -204,8 +204,8 @@ export function CartClient() {
                 onClick={() => setDeliveryPreference(pref)}
                 className={`flex-1 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
                   deliveryPreference === pref
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background hover:bg-accent"
+                    ? "border-[#92400e] bg-[#92400e] text-white"
+                    : "border-[#e8d5b7] bg-white hover:bg-[#fff8f0]"
                 }`}
               >
                 {pref}
@@ -230,7 +230,7 @@ export function CartClient() {
 
       {/* Place order */}
       <Button
-        className="w-full"
+        className="w-full rounded-[4px] bg-[#92400e] text-white hover:bg-[#78350f]"
         size="lg"
         disabled={!canSubmit}
         onClick={handlePlaceOrder}
