@@ -20,7 +20,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   Pending:
     "border-transparent bg-yellow-100 text-yellow-800",
   Confirmed:
-    "border-transparent bg-blue-100 text-blue-800",
+    "border-transparent bg-[#fef3c7] text-[#92400e]",
   Packed:
     "border-transparent bg-purple-100 text-purple-800",
   Delivered:
@@ -89,16 +89,16 @@ export function OrdersClient() {
       <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="px-4 py-3 text-left font-medium">Reference</th>
-              <th className="px-4 py-3 text-left font-medium">Customer</th>
-              <th className="hidden px-4 py-3 text-left font-medium sm:table-cell">
+            <tr className="border-b border-border bg-[#fdf0e0]">
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase text-[#78350f]">Reference</th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase text-[#78350f]">Customer</th>
+              <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase text-[#78350f] sm:table-cell">
                 Phone
               </th>
-              <th className="px-4 py-3 text-center font-medium">Items</th>
-              <th className="px-4 py-3 text-right font-medium">Total</th>
-              <th className="px-4 py-3 text-center font-medium">Status</th>
-              <th className="hidden px-4 py-3 text-center font-medium md:table-cell">
+              <th className="px-4 py-3 text-center text-[11px] font-medium uppercase text-[#78350f]">Items</th>
+              <th className="px-4 py-3 text-right text-[11px] font-medium uppercase text-[#78350f]">Total</th>
+              <th className="px-4 py-3 text-center text-[11px] font-medium uppercase text-[#78350f]">Status</th>
+              <th className="hidden px-4 py-3 text-center text-[11px] font-medium uppercase text-[#78350f] md:table-cell">
                 Type
               </th>
             </tr>
@@ -170,7 +170,7 @@ function KpiCard({
 }) {
   return (
     <div
-      className={`rounded-lg border border-border bg-card p-4 ${
+      className={`rounded-lg border border-border border-t-[3px] border-t-[#92400e] bg-white p-4 ${
         clickable
           ? "cursor-pointer transition-shadow hover:shadow-md"
           : ""
