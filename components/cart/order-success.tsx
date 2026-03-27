@@ -35,13 +35,13 @@ export function OrderSuccess({ reference }: { reference: string }) {
   }, []);
 
   return (
-    <div className="py-16 text-center">
+    <div className="mx-auto max-w-md rounded-lg bg-white p-8 py-16 text-center shadow-sm">
       <CheckCircle className="mx-auto h-16 w-16 text-emerald-500" />
       <h2 className="mt-6 text-2xl font-bold">Order Placed!</h2>
       <p className="mt-2 text-muted-foreground">
         Thank you for your order. Your reference number is:
       </p>
-      <p className="mt-3 text-3xl font-bold tracking-wide text-primary">
+      <p className="mt-3 text-3xl font-bold tracking-wide text-[#92400e]">
         {reference}
       </p>
       <p className="mt-4 text-sm text-muted-foreground">
