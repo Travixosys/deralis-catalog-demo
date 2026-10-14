@@ -4,7 +4,11 @@ import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store/cart";
+import { useInventory } from "@/lib/store/inventory";
+import { getStockStatus } from "@/lib/stock";
+import { SEED_LEVELS } from "@/lib/stock-seed";
 import type { Product } from "@/lib/types";
+import { useHydrated } from "@/lib/use-hydrated";
 
 function getInitials(name: string): string {
   return name
@@ -28,7 +32,12 @@ function stockBadgeClass(status: Product["stockStatus"]): string {
 
 export function ProductCard({ product }: { product: Product }) {
   const addItem = useStore((s) => s.addItem);
-  const isOutOfStock = product.stockStatus === "Out of Stock";
+  const hydrated = useHydrated();
+  const liveLevel = useInventory((s) => s.levels[product.id]);
+  const stockStatus = getStockStatus(
+    hydrated ? liveLevel : SEED_LEVELS[product.id]
+  );
+  const isOutOfStock = stockStatus === "Out of Stock";
 
   return (
     <div className="flex flex-col overflow-hidden rounded-[6px] border border-[#e8d5b7] bg-white shadow-sm transition-all hover:shadow-md hover:border-[#92400e]">
@@ -59,8 +68,8 @@ export function ProductCard({ product }: { product: Product }) {
           <span className="text-lg font-bold">
             €{product.price.toFixed(2)}
           </span>
-          <Badge className={stockBadgeClass(product.stockStatus)}>
-            {product.stockStatus}
+          <Badge className={stockBadgeClass(stockStatus)}>
+            {stockStatus}
           </Badge>
         </div>
 

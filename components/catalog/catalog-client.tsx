@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { products } from "@/lib/mock-data";
+import { getStockStatus } from "@/lib/stock";
+import { useInventory } from "@/lib/store/inventory";
 import { CATEGORIES } from "@/lib/types";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -14,8 +16,9 @@ import { ProductGridSkeleton } from "./product-grid-skeleton";
 export function CatalogClient() {
   const searchParams = useSearchParams();
   const stockFilter = searchParams.get("stock");
+  const levels = useInventory((s) => s.levels);
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [activeCategory, setActiveCategory] = useState<Category | "All">(
     "All"
   );
@@ -39,10 +42,11 @@ export function CatalogClient() {
       const matchesSearch = p.name
         .toLowerCase()
         .includes(search.toLowerCase());
-      const matchesStock = !showLowStockOnly || p.stockStatus === "Low Stock";
+      const matchesStock =
+        !showLowStockOnly || getStockStatus(levels[p.id]) === "Low Stock";
       return matchesCategory && matchesSearch && matchesStock;
     });
-  }, [search, activeCategory, showLowStockOnly]);
+  }, [search, activeCategory, showLowStockOnly, levels]);
 
   return (
     <div className="space-y-6">

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { CartItem, Order, OrderItem, OrderStatus, Product } from "../types";
 import { seedOrders } from "../mock-data";
 
@@ -32,7 +33,8 @@ function generateReference(existingOrders: Order[]): string {
   return `MKT-2026-${String(maxNum + 1).padStart(4, "0")}`;
 }
 
-export const useStore = create<StoreState>((set, get) => ({
+export const useStore = create<StoreState>()(
+  persist((set, get) => ({
   // ── Cart ──
   items: [],
 
@@ -99,4 +101,10 @@ export const useStore = create<StoreState>((set, get) => ({
     })),
 
   resetOrders: () => set({ orders: [...seedOrders] }),
-}));
+}), {
+    // Orders survive a reload, like the inventory store. The cart is not persisted.
+    name: "marche-orders-v1",
+    version: 1,
+    partialize: (s) => ({ orders: s.orders }),
+  })
+);

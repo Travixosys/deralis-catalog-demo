@@ -5,6 +5,8 @@ import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/store/cart";
+import { useInventory } from "@/lib/store/inventory";
+import { announceCrossings } from "@/components/admin/stock-toast";
 import type { DeliveryPreference } from "@/lib/types";
 import { OrderSuccess } from "./order-success";
 import Link from "next/link";
@@ -15,6 +17,9 @@ export function CartClient() {
   const removeItem = useStore((s) => s.removeItem);
   const clearCart = useStore((s) => s.clearCart);
   const addOrder = useStore((s) => s.addOrder);
+  const checkAvailability = useInventory((s) => s.checkAvailability);
+  const recordOnlineOrder = useInventory((s) => s.recordOnlineOrder);
+  const [stockError, setStockError] = useState<string | null>(null);
 
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
@@ -52,6 +57,17 @@ export function CartClient() {
     if (!customerName.trim() || !phone.trim()) return;
     if (deliveryPreference === "Delivery" && !address.trim()) return;
 
+    const lines = items.map((i) => ({ productId: i.product.id, qty: i.quantity }));
+    const shortages = checkAvailability(lines);
+    if (shortages.length > 0) {
+      setStockError(
+        `Not enough stock: ${shortages
+          .map((s) => `${s.productName} (${s.available} left)`)
+          .join(", ")}. Please adjust your cart.`
+      );
+      return;
+    }
+
     const order = addOrder({
       customerName: customerName.trim(),
       phone: phone.trim(),
@@ -66,6 +82,14 @@ export function CartClient() {
       })),
       specialInstructions: specialInstructions.trim() || undefined,
     });
+
+    const stock = recordOnlineOrder(lines, order.reference);
+    if (stock.ok) {
+      announceCrossings(
+        stock.crossings,
+        (id) => items.find((i) => i.product.id === id)?.product.name ?? id
+      );
+    }
 
     clearCart();
     setOrderReference(order.reference);
@@ -227,6 +251,12 @@ export function CartClient() {
           </div>
         )}
       </div>
+
+      {stockError && (
+        <p className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+          {stockError}
+        </p>
+      )}
 
       {/* Place order */}
       <Button

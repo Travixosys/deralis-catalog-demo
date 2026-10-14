@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useStore } from "@/lib/store/cart";
-import { products } from "@/lib/mock-data";
+import { KpiCard } from "@/components/admin/kpi-card";
+import { useInventory } from "@/lib/store/inventory";
+import { getStockStatus } from "@/lib/stock";
+import { useHydrated } from "@/lib/use-hydrated";
+import { seedOrders } from "@/lib/mock-data";
 import type { Order, OrderStatus } from "@/lib/types";
 import { OrderDetailSheet } from "./order-detail-sheet";
 import Link from "next/link";
@@ -28,13 +32,18 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 };
 
 export function OrdersClient() {
-  const orders = useStore((s) => s.orders);
+  const hydrated = useHydrated();
+  const persistedOrders = useStore((s) => s.orders);
+  // Orders are persisted: render the seed until localStorage has hydrated.
+  const orders = hydrated ? persistedOrders : seedOrders;
+  const levels = useInventory((s) => s.levels);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [now] = useState(() => Date.now());
 
   const kpis = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date(now).toISOString().split("T")[0];
     const oneWeekAgo = new Date(
-      Date.now() - 7 * 24 * 60 * 60 * 1000
+      now - 7 * 24 * 60 * 60 * 1000
     ).toISOString();
 
     const ordersToday = orders.filter(
@@ -49,12 +58,12 @@ export function OrdersClient() {
       .filter((o) => o.createdAt >= oneWeekAgo)
       .reduce((sum, o) => sum + o.total, 0);
 
-    const lowStockCount = products.filter(
-      (p) => p.stockStatus === "Low Stock"
+    const lowStockCount = Object.values(levels).filter(
+      (l) => getStockStatus(l) === "Low Stock"
     ).length;
 
     return { ordersToday, pendingPickup, revenueThisWeek, lowStockCount };
-  }, [orders]);
+  }, [orders, levels, now]);
 
   return (
     <div className="space-y-8">
@@ -79,7 +88,7 @@ export function OrdersClient() {
           <KpiCard
             icon={<AlertTriangle className="h-5 w-5 text-amber-600" />}
             label="Low Stock Alerts"
-            value={String(kpis.lowStockCount)}
+            value={hydrated ? String(kpis.lowStockCount) : "–"}
             clickable
           />
         </Link>
@@ -153,34 +162,6 @@ export function OrdersClient() {
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
       />
-    </div>
-  );
-}
-
-function KpiCard({
-  icon,
-  label,
-  value,
-  clickable,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  clickable?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-lg border border-border border-t-[3px] border-t-[#92400e] bg-white p-4 ${
-        clickable
-          ? "cursor-pointer transition-shadow hover:shadow-md"
-          : ""
-      }`}
-    >
-      <div className="flex items-center gap-2">
-        {icon}
-        <span className="text-sm text-muted-foreground">{label}</span>
-      </div>
-      <p className="mt-2 text-2xl font-bold">{value}</p>
     </div>
   );
 }
