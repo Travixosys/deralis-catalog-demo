@@ -94,9 +94,9 @@ export function CatalogClient() {
         <ProductGridSkeleton />
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center text-muted-foreground">
-          <p className="text-lg">No products found.</p>
+          <p className="text-lg">Nothing matches that yet.</p>
           <p className="mt-1 text-sm">
-            Try adjusting your search or filter.
+            Try another spelling, or clear the filter to see everything.
           </p>
         </div>
       ) : (
