@@ -5,6 +5,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { Settings, Plus, RotateCcw, ArrowLeftRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store/cart";
+import { useInventory } from "@/lib/store/inventory";
+import { resetDemo } from "@/lib/store/reset-demo";
 import { products } from "@/lib/mock-data";
 
 const DEMO_NAMES = [
@@ -38,12 +40,15 @@ export function DemoControls() {
   const router = useRouter();
   const pathname = usePathname();
   const addOrder = useStore((s) => s.addOrder);
-  const resetOrders = useStore((s) => s.resetOrders);
+  const recordOnlineOrder = useInventory((s) => s.recordOnlineOrder);
 
   function simulateOrder() {
+    // Only pick products with enough stock for the max random quantity (3).
+    const { levels } = useInventory.getState();
     const inStockProducts = products.filter(
-      (p) => p.stockStatus !== "Out of Stock"
+      (p) => (levels[p.id]?.qty ?? 0) >= 4
     );
+    if (inStockProducts.length === 0) return;
     const itemCount = Math.floor(Math.random() * 3) + 1;
     const selectedProducts = Array.from({ length: itemCount }, () =>
       randomFrom(inStockProducts)
@@ -69,7 +74,13 @@ export function DemoControls() {
       }
     }
 
-    addOrder({
+    const lines = Array.from(itemMap.values()).map((i) => ({
+      productId: i.productId,
+      qty: i.quantity,
+    }));
+    if (useInventory.getState().checkAvailability(lines).length > 0) return;
+
+    const order = addOrder({
       customerName: randomFrom(DEMO_NAMES),
       phone: randomFrom(DEMO_PHONES),
       deliveryPreference: Math.random() > 0.5 ? "Delivery" : "Pickup",
@@ -79,6 +90,7 @@ export function DemoControls() {
       specialInstructions:
         Math.random() > 0.7 ? "Please call before delivery" : undefined,
     });
+    recordOnlineOrder(lines, order.reference);
   }
 
   function switchView() {
@@ -95,10 +107,11 @@ export function DemoControls() {
         <div className="mb-3 w-56 rounded-lg border border-border bg-card p-3 shadow-lg">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Controls
+              Contrôles de démo
             </span>
             <button
               onClick={() => setOpen(false)}
+              aria-label="Fermer"
               className="rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
             >
               <X className="h-3.5 w-3.5" />
@@ -112,16 +125,16 @@ export function DemoControls() {
               onClick={simulateOrder}
             >
               <Plus className="h-3.5 w-3.5" />
-              Simulate New Order
+              Simuler une commande
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="w-full justify-start gap-2"
-              onClick={resetOrders}
+              onClick={resetDemo}
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              Reset Orders
+              Réinitialiser la démo
             </Button>
             <Button
               variant="outline"
@@ -130,13 +143,14 @@ export function DemoControls() {
               onClick={switchView}
             >
               <ArrowLeftRight className="h-3.5 w-3.5" />
-              Switch View
+              Changer de vue
             </Button>
           </div>
         </div>
       )}
       <button
         onClick={() => setOpen(!open)}
+        aria-label="Contrôles de démo"
         className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card shadow-md transition-transform hover:scale-105"
       >
         <Settings className="h-4 w-4 text-muted-foreground" />
