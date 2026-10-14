@@ -3,25 +3,27 @@
 import Link from "next/link";
 import { ShoppingCart, Store } from "lucide-react";
 import { useStore } from "@/lib/store/cart";
+import { useHydrated } from "@/lib/use-hydrated";
 import { useEffect, useState } from "react";
 
 export function Header() {
   const items = useStore((s) => s.items);
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const [bounce, setBounce] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [prevCount, setPrevCount] = useState(itemCount);
+  const mounted = useHydrated();
+
+  // Start the bounce when the count changes (adjusting state during render).
+  if (itemCount !== prevCount) {
+    setPrevCount(itemCount);
+    if (itemCount > 0) setBounce(true);
+  }
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (itemCount > 0 && mounted) {
-      setBounce(true);
-      const timer = setTimeout(() => setBounce(false), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [itemCount, mounted]);
+    if (!bounce) return;
+    const timer = setTimeout(() => setBounce(false), 500);
+    return () => clearTimeout(timer);
+  }, [bounce]);
 
   return (
     <header className="sticky top-0 z-50 bg-[#1a1a1a]">
